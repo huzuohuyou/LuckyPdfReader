@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>pdf文件转canvas</title>
+</head>
+
+<body>
+
+	<div>
+		<canvas id="can" width="800" height="800"></canvas>
+		<input id="test" type="button" value="test" />
+		<input type="button" value="+" />
+		<input type="button" value="-" />
+		<input type="button" value="red" style="background: red;" />
+		<input type="button" value="yellow" style="background: yellow;" />
+		<input type="button" value="blue" style="background: blue;" />
+		<input type="button" value="black" style="background: black; color: white;" />
+		<input type="button" value="white" style="background:;" />
+		<input type="button" value="橡皮+" />
+		<input type="button" value="橡皮-" />
+		<!--添加一个rgb色-->
+		<input type="color" />
+	</div>
+	<div id="canvas"></div>
+	<script type="text/javascript" src="js/jquery-3.2.0.min.js"></script>
+	<script type="text/javascript" src="js/pdfjs/build/pdf.js"></script>
+	<script>
+		//创建canvas元素
+		function createPdfContainer(id, className) {
+			var pdfContainer = document.getElementById('canvas');
+			var canvasNew = document.createElement('canvas');
+			canvasNew.id = id;
+			canvasNew.className = className;
+			pdfContainer.appendChild(canvasNew);
+		};
+
+		//建议给定pdf宽度
+		function renderPDF(pdf, i, id) {
+			pdf.getPage(i).then(function (page) {
+				var scale = 4; //scale的值是canvas的渲染尺寸，影响清晰度
+				var viewport = page.getViewport({
+					scale: scale
+				});
+				viewport.width = 3000;
+				//
+				//  准备用于渲染的 canvas 元素
+				//
+				var mycolor = 'black';
+				//b表示画布
+				var b = 1;
+				//a表示橡皮
+				var a = 50;
+				var canvas = document.getElementById(id);
+				var context = canvas.getContext('2d');
+				canvas.height = viewport.height;
+				canvas.width = viewport.width;
+				//
+				// 将 PDF 页面渲染到 canvas 上下文中
+				//
+				var renderContext = {
+					canvasContext: context,
+					viewport: viewport
+				};
+				page.render(renderContext);
+
+			});
+		};
+
+		//创建和pdf页数等同的canvas数
+		function createSeriesCanvas(num, template) {
+			var id = '';
+			for (var j = 1; j <= num; j++) {
+				id = template + j;
+				createPdfContainer(id, 'pdfClass');
+			}
+		}
+
+		//读取pdf文件，并加载到页面中
+		function loadPDF(fileURL) {
+			pdfjsLib.getDocument(fileURL).promise.then(function (pdf) {
+				//用 promise 获取页面
+				var id = '';
+				var idTemplate = 'cw-pdf-';
+				var pageNum = pdf.numPages; //pdf文件总页数
+				//根据页码创建画布
+				createSeriesCanvas(pageNum, idTemplate);
+				$("#canvas canvas").css("width", "100%"); //canvas展示宽度
+				//将pdf渲染到画布上去
+				for (var i = 1; i <= pageNum; i++) {
+					id = idTemplate + i;
+					renderPDF(pdf, i, id);
+				}
+			});
+		}
+
+
+		var test_btn = document.getElementById("test");
+		test_btn.onclick = function () {
+			var mycolor = 'black';
+			//b表示画布
+			var b = 1;
+			//a表示橡皮
+			var a = 50;
+			console.log('hahah')
+			// hello()
+			var canvas = document.getElementById("cw-pdf-1");
+			var ctx = canvas.getContext("2d");
+			ctx.fillRect(20, 20, 150, 100);
+
+			if (!ctx) return;
+
+			const MOUSE_LEFT_BUTTON = 0; // https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent/button
+
+			let isDrawing = false;
+			let x = 0;
+			let y = 0;
+
+			canvas.addEventListener("mousedown", (event) => {
+				// console.log(event);
+				if (event.button !== MOUSE_LEFT_BUTTON) {
+					return;
+				}
+
+				x = event.layerX;
+				y = event.layerY;
+
+				isDrawing = true;
+			});
+
+			canvas.addEventListener("mousemove", (event) => {
+				// console.log(event);
+				// console.log(event.layerX, event.layerY);
+				if (event.button !== MOUSE_LEFT_BUTTON) {
+					return;
+				}
+
+				if (isDrawing) {
+					drawLine(ctx, mycolor, 1, x, y, event.layerX, event.layerY);
+					x = event.layerX;
+					y = event.layerY;
+				}
+			});
+
+			canvas.addEventListener("mouseup", (event) => {
+				// console.log(event);
+				if (event.button !== MOUSE_LEFT_BUTTON) {
+					return;
+				}
+
+				if (isDrawing) {
+					drawLine(ctx, mycolor, 1, x, y, event.layerX, event.layerY);
+					x = 0;
+					y = 0;
+					isDrawing = false;
+				}
+			});
+			function drawLine(context, strokeStyle, lineWidth, x0, y0, x1, y1) {
+				context.beginPath();
+				context.strokeStyle = strokeStyle;
+				context.lineWidth = lineWidth;
+				context.moveTo(x0, y0);
+				context.lineTo(x1, y1);
+				context.stroke();
+			}
+			//加减粗细
+			var ainp = document.getElementsByTagName('input')
+			//画笔的加减
+			ainp[0].onclick = function () {
+				b++;
+			}
+			ainp[1].onclick = function () {
+				if (b > 1) {
+					b--;
+				}
+			}
+			//橡皮的加减
+			ainp[7].onclick = function () {
+				a += 5;
+			}
+			ainp[8].onclick = function () {
+				if (a > 5) {
+					a -= 5;
+				}
+			}
+			//改变颜色
+			for (var i = 2; i < ainp.length - 2; i++) {
+				ainp[i].onclick = function () {
+					mycolor = this.value;
+				}
+			}
+			//rgb颜色
+			ainp[9].onchange = function () {
+				mycolor = this.value;
+			}
+
+		}
+		loadPDF('http://172.22.32.1:8081/english.pdf')
+
+		
+
+	</script>
+
+</body>
+
+</html>

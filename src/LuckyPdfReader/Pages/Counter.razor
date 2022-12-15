@@ -1,0 +1,49 @@
+﻿@page "/counter"
+@inject IJSRuntime Js
+@*<div>
+    <input id="test" type="button" value="test" />
+    <input type="button" value="+" />
+    <input type="button" value="-" />
+    <input type="button" value="red" style="background: red;" />
+    <input type="button" value="yellow" style="background: yellow;" />
+    <input type="button" value="blue" style="background: blue;" />
+    <input type="button" value="black" style="background: black; color: white;" />
+    <input type="button" value="white" style="background:;" />
+    <input type="button" value="橡皮+" />
+    <input type="button" value="橡皮-" />
+    <!--添加一个rgb色-->
+    <input type="color" />
+</div>*@
+
+<PageTitle>Counter</PageTitle><MudText Typo="Typo.h3" GutterBottom="true">Counter</MudText>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">+</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">-</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">red</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">yellow</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">blue</MudButton>
+<MudButton name="tools"Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">black</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">white</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">橡皮+</MudButton>
+<MudButton name="tools" Color="Color.Primary" Variant="Variant.Filled" @onclick="IncrementCount">橡皮-</MudButton>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="LoadPdf">加载</MudButton>
+<MudButton Color="Color.Primary" Variant="Variant.Filled" @onclick="MarkDoc">标记</MudButton>
+<div id="canvas"></div>
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+
+    private async Task LoadPdf()
+    {
+        await Js.InvokeVoidAsync("loadDoc");
+    }
+
+    private async Task MarkDoc()
+    {
+        await Js.InvokeVoidAsync("markDoc");
+    }
+}
